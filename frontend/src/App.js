@@ -1,25 +1,64 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import AuthForm from './components/AuthForm';
+import Team from './components/Team';
+import Market from './components/Market';
+import axios from 'axios';
 
-function App() {
+const App = () => {
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [team, setTeam] = useState(null);
+  const [market, setMarket] = useState([]);
+
+  const handleAuth = async (email, password) => {
+    try {
+      const response = await axios.post('http://localhost:8000/auth', { email, password });
+      setToken(response.data.token);
+      localStorage.setItem('token', response.data.token);
+      alert(response.data.message);
+    } catch (error) {
+      alert(error.response.data.error);
+    }
+  };
+
+  const fetchTeam = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/team', {
+        headers: { Authorization: token },
+      });
+      setTeam(response.data);
+    } catch (error) {
+      alert(error.response.data.error);
+    }
+  };
+
+  const fetchMarket = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/market');
+      setMarket(response.data);
+    } catch (error) {
+      alert(error.response.data.error);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      fetchTeam();
+      // fetchMarket();
+    }
+  }, [token]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {!token ? (
+        <AuthForm onAuth={handleAuth} />
+      ) : (
+        <div>
+          <Team team={team} />
+          {/* <Market market={market} /> */}
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default App;
