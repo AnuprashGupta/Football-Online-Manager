@@ -1,5 +1,4 @@
-// backend/controllers/teamController.js
-const teams = [];
+import { teams } from "../data.js";
 
 export const getTeam = (req, res) => {
   const userEmail = req.user.email;

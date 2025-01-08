@@ -1,7 +1,7 @@
 // backend/routes/teamRoutes.js
 import express from 'express';
-import { getTeam } from '../controllers/teamController';
-import { authenticate } from '../middleware/authMiddleware';
+import { getTeam } from '../controllers/teamController.js';
+import { authenticate } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.get('/', authenticate, getTeam);

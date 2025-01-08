@@ -1,12 +1,11 @@
 // backend/controllers/authController.js
 import jwt from 'jsonwebtoken';
 import { generatePlayers, INITIAL_BUDGET } from '../utils/helperFunctions.js';
-
+import { users, teams } from '../data.js';
 const SECRET = process.env.JWT_SECRET || "football_manager_secret";
-const users = [];
-const teams = [];
 
-export const loginOrRegister = (req, res) => {
+
+export const loginOrRegister = async (req, res) => {
   const { email, password } = req.body;
 
   let user = users.find(u => u.email === email);
@@ -15,11 +14,11 @@ export const loginOrRegister = (req, res) => {
     const token = jwt.sign({ email }, SECRET, { expiresIn: '1h' });
     users.push({ email, password, token });
 
-    // Create team
+    // Create team immediately
     const team = {
       userEmail: email,
       budget: INITIAL_BUDGET,
-      players: generatePlayers()
+      players: generatePlayers(),
     };
     teams.push(team);
 
@@ -35,3 +34,4 @@ export const loginOrRegister = (req, res) => {
   user.token = token;
   return res.status(200).json({ token, message: "User logged in successfully." });
 };
+

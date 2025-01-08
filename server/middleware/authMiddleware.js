@@ -1,12 +1,9 @@
-// backend/middleware/authMiddleware.js
 import jwt from 'jsonwebtoken';
 
 const SECRET = process.env.JWT_SECRET || "football_manager_secret";
 
 export const authenticate = (req, res, next) => {
-
   const token = req.headers.authorization;
-  console.log("--->token", token)
   if (!token) return res.status(401).json({ error: "Unauthorized." });
 
   try {

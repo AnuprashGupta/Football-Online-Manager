@@ -1,4 +1,3 @@
-// backend/utils/helperFunctions.js
 export const INITIAL_BUDGET = 5000000;
 export const generatePlayers = () => {
   const INITIAL_PLAYERS = {
@@ -20,6 +19,5 @@ export const generatePlayers = () => {
       });
     }
   });
-
   return players;
 };

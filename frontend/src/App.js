@@ -12,6 +12,7 @@ const App = () => {
   const handleAuth = async (email, password) => {
     try {
       const response = await axios.post('http://localhost:8000/auth', { email, password });
+      console.log("--->reponse", response.data)
       setToken(response.data.token);
       localStorage.setItem('token', response.data.token);
       alert(response.data.message);
@@ -21,6 +22,7 @@ const App = () => {
   };
 
   const fetchTeam = async () => {
+    console.log("-fetching team")
     try {
       const response = await axios.get('http://localhost:8000/team', {
         headers: { Authorization: token },
@@ -43,7 +45,7 @@ const App = () => {
   useEffect(() => {
     if (token) {
       fetchTeam();
-      // fetchMarket();
+      fetchMarket();
     }
   }, [token]);
 
@@ -54,7 +56,8 @@ const App = () => {
       ) : (
         <div>
           <Team team={team} />
-          {/* <Market market={market} /> */}
+          <Market token={token} market={market} fetchMarket={fetchMarket} />
+
         </div>
       )}
     </div>
