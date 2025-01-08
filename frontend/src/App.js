@@ -48,15 +48,17 @@ const App = () => {
       fetchMarket();
     }
   }, [token]);
-
+  const handlePlayerPurchase = () => {
+    fetchTeam();
+  };
   return (
-    <div>
+    <div className="container mx-auto p-4">
       {!token ? (
         <AuthForm onAuth={handleAuth} />
       ) : (
         <div>
           <Team team={team} />
-          <Market token={token} market={market} fetchMarket={fetchMarket} />
+          <Market token={token} market={market} fetchMarket={fetchMarket} onPlayerPurchase={handlePlayerPurchase}/>
 
         </div>
       )}
