@@ -3,7 +3,7 @@
 # Setup Instructions
 
 # after cloning the repo:
-
+git clone
 Repo URL: https://github.com/AnuprashGupta/Football-Online-Manager.git
 
 # backend/server setup:
