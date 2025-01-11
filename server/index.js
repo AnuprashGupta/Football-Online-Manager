@@ -3,12 +3,16 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
-// import teamRoutes from './routes/teamRoutes.js';
-// import marketRoutes from './routes/marketRoutes.js';
 import teamRoutes from './routes/teamRoute.js'
 import marketRoutes from './routes/marketRoute.js'
-dotenv.config();
+import mongoose from 'mongoose';
 
+dotenv.config();
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }).then(() => console.log('MongoDB Connected'))
+    .catch(err => console.error('MongoDB Connection Error:', err));
 const app = express();
 
 // Middleware
