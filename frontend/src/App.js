@@ -51,14 +51,24 @@ const App = () => {
   const handlePlayerPurchase = () => {
     fetchTeam();
   };
+  const handleLogout = () => {
+    setToken(null);
+    localStorage.removeItem('token');
+  };
   return (
     <div className="container mx-auto p-4">
       {!token ? (
         <AuthForm onAuth={handleAuth} />
       ) : (
         <div>
+            <button
+            onClick={handleLogout}
+            className="absolute top-4 right-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+          >
+            Logout
+          </button>
           <Team team={team} />
-          <Market token={token} market={market} fetchMarket={fetchMarket} onPlayerPurchase={handlePlayerPurchase}/>
+          <Market token={token} market={market} setMarket={setMarket} fetchMarket={fetchMarket} onPlayerPurchase={handlePlayerPurchase}/>
 
         </div>
       )}

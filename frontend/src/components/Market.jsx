@@ -1,19 +1,27 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const Market = ({ token, market, fetchMarket, onPlayerPurchase }) => {
+const Market = ({ token, market, setMarket,fetchMarket, onPlayerPurchase }) => {
   const [filters, setFilters] = useState({ team: '', player: '', price: '' });
   const [playerToSell, setPlayerToSell] = useState({ name: '', price: '' });
   const [message, setMessage] = useState('');
 
   const applyFilters = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/market', { params: filters });
-      fetchMarket(response.data); // Pass filtered data to parent fetchMarket
+      const response = await axios.get('http://localhost:8000/market', {
+        params: {
+          team: filters.team.trim(),
+          player: filters.player.trim(),
+          price: filters.price,
+        },
+      });
+      setMarket(response.data);
     } catch (error) {
       setMessage(`Error: ${error.response?.data?.error || error.message}`);
     }
   };
+  
+  
 
   const addToMarket = async () => {
     try {
@@ -30,17 +38,24 @@ const Market = ({ token, market, fetchMarket, onPlayerPurchase }) => {
   };
 
   const removeFromMarket = async (player) => {
+    setMessage(''); // Clear any previous message
     try {
       await axios.delete('http://localhost:8000/market', {
         headers: { Authorization: token },
         data: { player },
       });
       setMessage('Player removed from market successfully!');
-      fetchMarket();
+      fetchMarket(); // Refresh the market listings
     } catch (error) {
       setMessage(`Error: ${error.response?.data?.error || error.message}`);
     }
   };
+  const confirmRemove = (player) => {
+    if (window.confirm(`Are you sure you want to remove ${player} from the market?`)) {
+      removeFromMarket(player);
+    }
+  };
+  
 
   const buyPlayer = async (player) => {
     try {
@@ -140,14 +155,13 @@ const Market = ({ token, market, fetchMarket, onPlayerPurchase }) => {
                 >
                   Buy
                 </button>
-                {item.team === token.email && (
-                  <button
-                    onClick={() => removeFromMarket(item.player)}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                  >
-                    Remove
-                  </button>
-                )}
+                <button
+  onClick={() => confirmRemove(item.player)}
+  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+>
+  Remove
+</button>
+
               </div>
             </div>
           ))}

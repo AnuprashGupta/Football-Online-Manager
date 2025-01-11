@@ -1,91 +1,85 @@
 // backend/controllers/marketController.js
 import { transferMarket, teams } from "../data.js";
+import Market from '../models/Market.js';
+import Team from '../models/Team.js';
 
 
-
-// Get all players in the transfer market with filters
-export const getMarket = (req, res) => {
+export const getMarket = async (req, res) => {
   const { team, player, price } = req.query;
 
-  let filteredMarket = transferMarket;
-  if (team) filteredMarket = filteredMarket.filter(t => t.team.toLowerCase().includes(team.toLowerCase()));
-  if (player) filteredMarket = filteredMarket.filter(t => t.player.toLowerCase().includes(player.toLowerCase()));
-  if (price) filteredMarket = filteredMarket.filter(t => t.price <= parseFloat(price));
+  let filter = {};
 
-  return res.status(200).json(filteredMarket);
+  if (team) filter.team = { $regex: `^${team}$`, $options: 'i' };  // Exact match, case-insensitive
+  if (player) filter.player = { $regex: `^${player}$`, $options: 'i' };
+  if (price) filter.price = { $lte: parseFloat(price) };  // Ensure price is a number
+
+  console.log("Applied Filter:", filter);
+
+  try {
+    const marketListings = await Market.find(filter);
+    res.status(200).json(marketListings);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch market data.' });
+  }
 };
 
-// Add a player to the transfer market
-export const addPlayerToMarket = (req, res) => {
+
+
+export const addPlayerToMarket = async (req, res) => {
   const { player, price } = req.body;
   const userEmail = req.user.email;
 
-  const userTeam = teams.find(t => t.userEmail === userEmail);
-  if (!userTeam || !userTeam.players.some(p => p.name === player)) {
-    return res.status(400).json({ error: "Player not in team or invalid team." });
+  const team = await Team.findOne({ userEmail });
+  if (!team || !team.players.some(p => p.name === player)) {
+    return res.status(400).json({ error: 'Player not in team.' });
   }
 
-  if (transferMarket.some(t => t.player === player)) {
-    return res.status(400).json({ error: "Player already listed in the market." });
+  const marketEntry = new Market({ player, team: userEmail, price });
+  await marketEntry.save();
+
+  res.status(201).json({ message: 'Player added to transfer market.' });
+};
+
+export const buyPlayer = async (req, res) => {
+  const { player } = req.body;
+  const userEmail = req.user.email;
+
+  const listing = await Market.findOne({ player });
+  if (!listing) return res.status(404).json({ error: 'Player not found in market.' });
+
+  const buyerTeam = await Team.findOne({ userEmail });
+  const cost = listing.price * 0.95;
+
+  if (buyerTeam.budget < cost) {
+    return res.status(400).json({ error: 'Insufficient budget.' });
   }
 
-  transferMarket.push({
-    team: userEmail,
-    player,
-    price: parseFloat(price),
-  });
+  buyerTeam.budget -= cost;
+  buyerTeam.players.push({ name: player, role: 'unknown', price: listing.price });
+  await buyerTeam.save();
 
-  return res.status(201).json({ message: "Player added to the transfer market." });
+  await Market.deleteOne({ player });
+  res.status(200).json({ message: 'Player purchased successfully.' });
 };
 
 // Remove a player from the transfer market
-export const removePlayerFromMarket = (req, res) => {
+export const removePlayerFromMarket = async (req, res) => {
   const { player } = req.body;
   const userEmail = req.user.email;
 
-  const listingIndex = transferMarket.findIndex(t => t.player === player && t.team === userEmail);
-  if (listingIndex === -1) {
-    return res.status(404).json({ error: "Player not found in the market or unauthorized." });
-  }
+  try {
+    const listing = await Market.findOne({ player, team: userEmail });
+    if (!listing) {
+      return res.status(404).json({ error: 'Player not found in the market or unauthorized.' });
+    }
 
-  transferMarket.splice(listingIndex, 1);
-  return res.status(200).json({ message: "Player removed from the transfer market." });
+    await Market.deleteOne({ player, team: userEmail });
+    res.status(200).json({ message: 'Player removed from the transfer market.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to remove player from the market.' });
+  }
 };
 
-// Buy a player from the transfer market
-export const buyPlayer = (req, res) => {
-  const { player } = req.body;
-  const userEmail = req.user.email;
 
-  const buyerTeam = teams.find(t => t.userEmail === userEmail);
-  const listing = transferMarket.find(t => t.player === player);
 
-  if (!listing) {
-    return res.status(404).json({ error: "Player not found in the market." });
-  }
-
-  if (listing.team === userEmail) {
-    return res.status(400).json({ error: "Cannot buy your own player." });
-  }
-
-  const purchasePrice = listing.price * 0.95;
-  if (buyerTeam.budget < purchasePrice) {
-    return res.status(400).json({ error: "Insufficient budget." });
-  }
-
-  // Deduct buyer's budget
-  buyerTeam.budget -= purchasePrice;
-  buyerTeam.players.push({ name: player, role: "unknown", price: listing.price });
-
-  // Remove player from seller's team
-  const sellerTeam = teams.find(t => t.userEmail === listing.team);
-  if (sellerTeam) {
-    sellerTeam.players = sellerTeam.players.filter(p => p.name !== player);
-  }
-
-  // Remove player from the market
-  transferMarket.splice(transferMarket.indexOf(listing), 1);
-
-  return res.status(200).json({ message: "Player purchased successfully." });
-};
 
