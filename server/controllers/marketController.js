@@ -1,4 +1,4 @@
-// backend/controllers/marketController.js
+
 import { transferMarket, teams } from "../data.js";
 import Market from '../models/Market.js';
 import Team from '../models/Team.js';
@@ -9,9 +9,9 @@ export const getMarket = async (req, res) => {
 
   let filter = {};
 
-  if (team) filter.team = { $regex: `^${team}$`, $options: 'i' };  // Exact match, case-insensitive
+  if (team) filter.team = { $regex: `^${team}$`, $options: 'i' }; 
   if (player) filter.player = { $regex: `^${player}$`, $options: 'i' };
-  if (price) filter.price = { $lte: parseFloat(price) };  // Ensure price is a number
+  if (price) filter.price = { $lte: parseFloat(price) }; 
 
   console.log("Applied Filter:", filter);
 

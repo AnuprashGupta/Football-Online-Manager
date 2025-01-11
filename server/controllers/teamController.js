@@ -1,8 +1,10 @@
-import { teams } from "../data.js";
+import Team from '../models/Team.js';
 
-export const getTeam = (req, res) => {
+export const getTeam = async (req, res) => {
   const userEmail = req.user.email;
-  const team = teams.find(t => t.userEmail === userEmail);
-  if (!team) return res.status(404).json({ error: "Team not found." });
+
+  const team = await Team.findOne({ userEmail });
+  if (!team) return res.status(404).json({ error: 'Team not found.' });
+
   res.json(team);
 };

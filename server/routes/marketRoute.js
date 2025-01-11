@@ -1,4 +1,4 @@
-// backend/routes/marketRoutes.js
+
 import express from 'express';
 import { getMarket, addPlayerToMarket, buyPlayer, removePlayerFromMarket } from '../controllers/marketController.js';
 import { authenticate } from '../middleware/authMiddleware.js';

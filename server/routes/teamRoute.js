@@ -1,4 +1,4 @@
-// backend/routes/teamRoutes.js
+
 import express from 'express';
 import { getTeam } from '../controllers/teamController.js';
 import { authenticate } from '../middleware/authMiddleware.js';

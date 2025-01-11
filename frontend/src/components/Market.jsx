@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const Market = ({ token, market, setMarket,fetchMarket, onPlayerPurchase }) => {
+const Market = ({ token, market, setMarket, fetchMarket, onPlayerPurchase }) => {
   const [filters, setFilters] = useState({ team: '', player: '', price: '' });
   const [playerToSell, setPlayerToSell] = useState({ name: '', price: '' });
   const [message, setMessage] = useState('');
@@ -20,8 +20,8 @@ const Market = ({ token, market, setMarket,fetchMarket, onPlayerPurchase }) => {
       setMessage(`Error: ${error.response?.data?.error || error.message}`);
     }
   };
-  
-  
+
+
 
   const addToMarket = async () => {
     try {
@@ -55,7 +55,7 @@ const Market = ({ token, market, setMarket,fetchMarket, onPlayerPurchase }) => {
       removeFromMarket(player);
     }
   };
-  
+
 
   const buyPlayer = async (player) => {
     try {
@@ -156,11 +156,11 @@ const Market = ({ token, market, setMarket,fetchMarket, onPlayerPurchase }) => {
                   Buy
                 </button>
                 <button
-  onClick={() => confirmRemove(item.player)}
-  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
->
-  Remove
-</button>
+                  onClick={() => confirmRemove(item.player)}
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                >
+                  Remove
+                </button>
 
               </div>
             </div>
